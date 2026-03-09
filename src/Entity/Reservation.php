@@ -6,14 +6,6 @@ use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-enum ReservationStatus: string
-{
-    case Pending = 'pending';
-    case Confirmed = 'confirmed';
-    case Cancelled = 'cancelled';
-    case Completed = 'completed';
-}
-
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 class Reservation
 {
@@ -43,7 +35,7 @@ class Reservation
     #[ORM\Column(length: 30)]
     private ?string $phone = null;
 
-    #[ORM\Column(type: "string", enumType: ReservationStatus::class)]
+    #[ORM\Column(length: 255)]
     private ?string $status = null;
 
     public function getId(): ?int
