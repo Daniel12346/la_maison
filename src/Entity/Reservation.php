@@ -38,6 +38,9 @@ class Reservation
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
+    #[ORM\Column]
+    private ?bool $isPrivate = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -135,6 +138,18 @@ class Reservation
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function isPrivate(): ?bool
+    {
+        return $this->isPrivate;
+    }
+
+    public function setIsPrivate(bool $isPrivate): static
+    {
+        $this->isPrivate = $isPrivate;
 
         return $this;
     }
