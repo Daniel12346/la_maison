@@ -37,6 +37,7 @@ class ReservationFormType extends AbstractType
             ])
             ->add('isPrivate', CheckboxType::class, [
                 'label' => 'Private',
+                'required' => false
             ])
             ->addDependent('timeSlot', ['date', 'partySize', "isPrivate"], function (DependentField $field, ?\DateTime $date, ?int $partySize, ?bool $isPrivate) {
                 if (!$date || !$partySize) {
