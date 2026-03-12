@@ -1,5 +1,8 @@
 <div
     {{ attributes }}
 >
-   {{form(form)}}
+<!-- nakon podnošenja forme, korisnik će biti preusmjeren na stranicu za potvrdu -->
+    {{ form_start(form, {'action': path('reservation_submit'), 'method': 'POST'}) }}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}
 </div>
