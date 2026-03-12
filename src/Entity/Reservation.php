@@ -36,7 +36,7 @@ class Reservation
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $status = null;
+    private ?string $status = 'Pending';
 
     #[ORM\Column]
     private ?bool $isPrivate = false;
