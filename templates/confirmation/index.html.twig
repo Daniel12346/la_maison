@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello ConfirmationController!{% endblock %}
+
+{% block body %}
+
+
+<div class="example-wrapper">
+    <h1>Reservation Confirmed!</h1>
+    
+    <div>
+        <span>Reservation details:</span>
+        <ul>
+            <li>Reservation code: {{ confirmation_number }}</li>
+            <li>Date: {{ reservation.date|date('Y-m-d') }}</li>
+            <li>Time: {{ reservation.timeSlot|date('H:i') }}</li>
+            <li>Number of Guests: {{ reservation.partySize }}</li>
+            <li>Name: {{ reservation.fullName }}</li>
+            <li>Email: {{ reservation.email }}</li>
+            <li>Phone: {{ reservation.phone }}</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
