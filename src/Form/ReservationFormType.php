@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -64,7 +65,7 @@ class ReservationFormType extends AbstractType
                     return;
                 }
 
-                $field->add(TypeTextType::class, [
+                $field->add(EmailType::class, [
                     'label' => 'Email',
                 ]);
             })
@@ -95,6 +96,7 @@ class ReservationFormType extends AbstractType
                 $field
                     ->add(TextareaType::class, [
                         'label' => 'Requests',
+                        'required' => false,
                     ]);
             })
             ->addDependent('submit', 'timeSlot', function (DependentField $field, ?\DateTime $timeSlot) {
