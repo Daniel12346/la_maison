@@ -36,10 +36,19 @@ class ReservationFormType extends AbstractType
                 'widget' => 'single_text',
                 'data' => new \DateTime(),
             ])
-            ->add('isPrivate', CheckboxType::class, [
-                'label' => 'Private',
-                'required' => false
-            ])
+            //opcija za privatnu rezervaciju se prikazuje samo ako je odabrani datum petak ili subota
+            ->addDependent('isPrivate', ['date'], function (DependentField $field, ?\DateTime $date) {
+                if (!$date) {
+                    return;
+                }
+                $dayOfWeek = (int) $date->format('N'); // 5 = petak, 6 = subota
+                if ($dayOfWeek === 5 || $dayOfWeek === 6) {
+                    $field->add(CheckboxType::class, [
+                        'label' => 'Private',
+                        'required' => false
+                    ]);
+                }
+            })
             ->addDependent('timeSlot', ['date', 'partySize', "isPrivate"], function (DependentField $field, ?\DateTime $date, ?int $partySize, ?bool $isPrivate) {
                 if (!$date || !$partySize) {
                     //polje za timeSlot se prikazuje samo ako je date i partySize popunjeno
@@ -47,7 +56,7 @@ class ReservationFormType extends AbstractType
                     return;
                 }
                 //ponuđene opcije za timeSlot ovise o date, partySize i isPrivate i automatski se mijenjaju kad korisnik promijeni vrijednost nekog od tih polja
-                $timeSlots = $this->repository->getAvailableTimeSlots($date, $partySize, $isPrivate);
+                $timeSlots = $this->repository->getAvailableTimeSlots($date, $partySize, $isPrivate ?? false);
                 $choices = [];
                 foreach ($timeSlots as $timeSlot) {
                     $choices[$timeSlot] = new \DateTime($timeSlot);
