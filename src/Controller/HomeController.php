@@ -34,8 +34,7 @@ final class HomeController extends AbstractController
             $em = $doctrine->getManager();
             $em->persist($reservation);
             $em->flush();
-
-            return $this->redirectToRoute('confirmation', ['id' => $reservation->getId()]);
+            return $this->redirectToRoute('confirmation', ['referenceCode' => $reservation->getReferenceCode()]);
         }
 
         return $this->redirectToRoute('app_home');
