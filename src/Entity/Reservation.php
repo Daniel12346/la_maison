@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 #[MaxCapacity]
+#[ORM\HasLifecycleCallbacks]
 class Reservation
 {
     #[ORM\Id]
@@ -101,6 +102,18 @@ class Reservation
 
     #[ORM\Column]
     private ?bool $isPrivate = false;
+
+    #[ORM\Column(type: 'string', length: 8, unique: true)]
+    private ?string $referenceCode = null;
+
+    #[ORM\PrePersist]
+
+    public function generateReferenceCode(): void
+    {
+        if ($this->referenceCode === null) {
+            $this->referenceCode = 'LM-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 5));
+        }
+    }
 
     public function getId(): ?int
     {
@@ -212,6 +225,17 @@ class Reservation
     {
         $this->isPrivate = $isPrivate;
 
+        return $this;
+    }
+
+    public function getReferenceCode(): ?string
+    {
+        return $this->referenceCode;
+    }
+
+    public function setReferenceCode(string $referenceCode): self
+    {
+        $this->referenceCode = $referenceCode;
         return $this;
     }
 }

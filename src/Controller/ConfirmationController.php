@@ -9,14 +9,12 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ConfirmationController extends AbstractController
 {
-    #[Route('/confirmation/{id}', name: 'confirmation')]
+    #[Route('/confirmation/{referenceCode}', name: 'confirmation')]
     public function index(Reservation $reservation): Response
     {
-        $confirmationNumber = 'LM-' . strtoupper(substr(md5(uniqid()), 0, 5));
         return $this->render('confirmation/index.html.twig', [
             'controller_name' => 'ConfirmationController',
             'reservation' => $reservation,
-            'confirmation_number' => $confirmationNumber,
         ]);
     }
 }

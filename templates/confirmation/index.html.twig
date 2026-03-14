@@ -11,7 +11,7 @@
     <div>
         <span>Reservation details:</span>
         <ul>
-            <li>Reservation code: {{ confirmation_number }}</li>
+            <li>Reservation code: {{ reservation.referenceCode }}</li>
             <li>Date: {{ reservation.date|date('Y-m-d') }}</li>
             <li>Time: {{ reservation.timeSlot|date('H:i') }}</li>
             <li>Number of Guests: {{ reservation.partySize }}</li>
