@@ -16,30 +16,6 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
-    //    /**
-    //     * @return Reservation[] Returns an array of Reservation objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Reservation
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
     public function getAvailableTimeSlots(\DateTime $date, int $partySize, bool $isPrivate): array
     {
         $availableTimeSlots = [];
@@ -57,17 +33,18 @@ class ReservationRepository extends ServiceEntityRepository
         //tražimo timeSlotove koji su popunjeni za odabrani datum
         //promatramo samo rezervacije na taj datum koje nisu cancelled i grupiramo ih prema timeSlotu kako bismo mogli dobiti ukupan zbroj gostiju u tom timeSlotu
         //timeSlot je popunjen ako je zbroj već postojećih gostiju i partySize (broj gostiju za novu korisničku rezervaciju) veći od 20
+        //u izračunu se uključuju i potvrđene ("Confirmed") i rezervacije koje su još uvijek u procesu ("Pending")
         $filledTimeSlotsQuery = !$isPrivate ? $entityManager->createQuery(
             "SELECT r.timeSlot FROM App\Entity\Reservation r
-            WHERE r.date = :date AND r.isPrivate = FALSE AND r.status != 'cancelled'
+            WHERE r.date = :date AND r.isPrivate = FALSE AND r.status != 'Cancelled'
             GROUP BY r.timeSlot
             HAVING SUM(r.partySize)+ :partySize > 20"
         )->setParameter('date', $date)->setParameter('partySize', $partySize)
-            //budući da je moguća samo jedna privatna rezervacija u jednom timeSlotu, nije potrebno grupirati rezervacija
-            //ako već postoji rezervacija u nekom timeSlotu, on je timeSlot popunjen
+            //budući da je moguća samo jedna privatna rezervacija u jednom timeSlotu, nije potrebno grupirati rezervacije
+            //ako postoji privatna rezervacija u nekom timeSlotu, on je popunjen (za privatne rezervacije)
             : $entityManager->createQuery(
                 "SELECT r.timeSlot FROM App\Entity\Reservation r
-            WHERE r.date = :date AND r.isPrivate = TRUE AND r.status != 'cancelled' "
+            WHERE r.date = :date AND r.isPrivate = TRUE AND r.status != 'Cancelled' "
             )->setParameter('date', $date);
         $filledTimeSlots = $filledTimeSlotsQuery->getResult();
         //izbacujemo timeSlotove koji su popunjeni iz dostupnih
@@ -78,5 +55,24 @@ class ReservationRepository extends ServiceEntityRepository
             }
         }
         return $availableTimeSlots;
+    }
+
+    public function sumPartySizeByDateAndTimeSlot(\DateTime $date, \DateTime $timeSlot, ?int $excludeId = null): int
+    {
+        $qb = $this->createQueryBuilder('r')
+            //COALESCE vraća 0 ako nema rezultata
+            ->select('COALESCE(SUM(r.partySize), 0) as total')
+            ->andWhere('r.date = :date')
+            ->andWhere('r.timeSlot = :timeSlot')
+            ->andWhere("r.status != 'Cancelled'")
+            ->setParameter('date', $date)
+            ->setParameter('timeSlot', $timeSlot);
+
+        if (null !== $excludeId) {
+            $qb->andWhere('r.id != :id')
+                ->setParameter('id', $excludeId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 }
