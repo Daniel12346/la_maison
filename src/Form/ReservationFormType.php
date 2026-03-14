@@ -42,12 +42,17 @@ class ReservationFormType extends AbstractType
                     return;
                 }
                 $dayOfWeek = (int) $date->format('N'); // 5 = petak, 6 = subota
-                if ($dayOfWeek === 5 || $dayOfWeek === 6) {
-                    $field->add(CheckboxType::class, [
-                        'label' => 'Private',
-                        'required' => false
-                    ]);
+                $options = [
+                    'label' => 'Private',
+                    'required' => false,
+                    'data' => false,
+                    'row_attr' => [],
+                ];
+                if (!($dayOfWeek === 5 || $dayOfWeek === 6)) {
+                    // ako nije petak ili subota, opcija za privatnu rezervaciju se skriva, ali i dalje postoji u formi s vrijednošću false, što je važno jer timeSlotovi i dostupnost ovise o isPrivate
+                    $options['row_attr']['style'] = 'display:none;';
                 }
+                $field->add(CheckboxType::class, $options);
             })
             ->addDependent('timeSlot', ['date', 'partySize', "isPrivate"], function (DependentField $field, ?\DateTime $date, ?int $partySize, ?bool $isPrivate) {
                 if (!$date || !$partySize) {
@@ -122,6 +127,7 @@ class ReservationFormType extends AbstractType
         //polja forma odgovaraju poljima entiteta Reservation
         $resolver->setDefaults([
             'data_class' => Reservation::class,
+            'exclude_fields' => ['referenceCode', 'status', 'id'], //polja koja nisu uključena u formu
         ]);
     }
 }
