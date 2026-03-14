@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\ReservationRepository;
+use App\Validator\MaxCapacity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
+#[MaxCapacity]
 class Reservation
 {
     #[ORM\Id]
@@ -18,14 +22,66 @@ class Reservation
     private ?int $partySize = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\Range(
+        min: 'today',
+        max: '+30 days',
+        notInRangeMessage: 'Please select a date between today and 30 days from now.'
+    )]
     private ?\DateTime $date = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $fullName = null;
 
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
+    #[Assert\Callback]
+    public function validateTimeSlot(ExecutionContextInterface $context): void
+    {
+        if (!$this->timeSlot) {
+            return;
+        }
+        $hour = (int)$this->timeSlot->format('H');
+        if ($this->isPrivate) {
+            if ($hour < 18 || $hour >= 22) {
+                $context->buildViolation('For private reservations, time must be between 18:00 and 22:00.')
+                    ->atPath('timeSlot')
+                    ->addViolation();
+            }
+        } else {
+            if ($hour < 12 || $hour >= 22) {
+                $context->buildViolation('Time must be between 12:00 and 22:00.')
+                    ->atPath('timeSlot')
+                    ->addViolation();
+            }
+        }
+    }
+
+    #[Assert\Callback]
+    public function validatePartySize(ExecutionContextInterface $context): void
+    {
+        if (null === $this->partySize) {
+            return;
+        }
+
+        $isPrivate = (bool) $this->isPrivate;
+
+        $min = $isPrivate ? 6 : 1;
+        $max = $isPrivate ? 12 : 10;
+
+        if ($this->partySize < $min || $this->partySize > $max) {
+            $message = $isPrivate
+                ? 'For private reservations, party size must be between {{ min }} and {{ max }}.'
+                : 'Party size must be between {{ min }} and {{ max }}.';
+
+            $context->buildViolation($message)
+                ->setParameter('{{ min }}', (string) $min)
+                ->setParameter('{{ max }}', (string) $max)
+                ->atPath('partySize')
+                ->addViolation();
+        }
+    }
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTime $timeSlot = null;
 
@@ -33,9 +89,14 @@ class Reservation
     private ?string $requests = null;
 
     #[ORM\Column(length: 30)]
+    #[Assert\Regex(
+        pattern: '/^\+?[0-9\s\-]+$/',
+        message: 'Please enter a valid phone number.'
+    )]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Choice(choices: ['Pending', 'Completed', 'Confirmed', 'Cancelled'])]
     private ?string $status = 'Pending';
 
     #[ORM\Column]
