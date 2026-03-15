@@ -88,15 +88,11 @@ body {
     line-height: 1;
     margin-top: 0.1rem;
 }
-
-/* Mijenja boju ikone odabira datuma radi bolje vidljivosti na tamnoj pozadini */
 .reservation-card input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(1.2) contrast(1.1);
     opacity: 0.95;
     cursor: pointer;
 }
-
-/* Prilagođena svijetla strelica padajućeg izbornika za `select` elemente unutar kartice */
 .reservation-card select {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -117,7 +113,6 @@ body {
     -webkit-text-fill-color: #efe6c9;
 }
 
-/* Za Firefox: osigurava da je strelica `select` elementa vidljiva prisilnim postavljanjem pozadinske slike */
 @-moz-document url-prefix() {
     .reservation-card select {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='%23efe6c9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>");
@@ -147,6 +142,93 @@ body {
 }
 
 .reservation-card .form-row .time-col {
+}
+.homepage-hero {
+    height: 50vh;
+    width: 100%;
+    background-image: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url("/assets/restaurant.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.homepage-hero {
+    position: relative;
+}
+.page-bottom-gradient {
+    position: fixed;
+    top: 50vh;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: linear-gradient(
+        to bottom,
+        rgba(212, 151, 31, 0.65) 0%,
+        rgba(11, 11, 11, 1) 85%
+    );
+}
+
+.homepage-hero .hero-title {
+    position: absolute;
+    top: 10vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Bonheur Royale", cursive;
+    font-weight: 400;
+    font-size: 7rem;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    z-index: 12;
+    pointer-events: none;
+}
+
+@media (max-width: 640px) {
+    .homepage-hero .hero-title {
+        font-size: 3.6rem;
+        top: 8vh;
+    }
+}
+
+.hero-form {
+    position: absolute;
+    top: 40vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+    padding: 0 1rem;
+}
+
+.hero-form .example-wrapper {
+    pointer-events: auto;
+    width: 100%;
+    max-width: 720px;
+}
+.hero-form .example-wrapper {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.homepage-hero .reservation-card {
+    background: rgba(11, 11, 11, 0.88);
+    box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.65),
+        0 12px 48px rgba(212, 175, 55, 0.18),
+        0 0 36px rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    backdrop-filter: blur(6px);
+}
+
+.homepage-hero .reservation-card input,
+.homepage-hero .reservation-card select,
+.homepage-hero .reservation-card textarea {
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
 }
 
 .reservation-layout {
