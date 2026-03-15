@@ -3,7 +3,9 @@
     <div class="form-row-wrapper">
         {{ form_label(form) }}
         {{ form_widget(form) }}
-        {{ form_errors(form) }}
+        <div class="form-errors" role="alert" aria-live="polite">
+            {{ form_errors(form) }}
+        </div>
     </div>
 </div>
 {%- endblock %}
