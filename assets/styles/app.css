@@ -57,13 +57,71 @@ body {
 .reservation-card .form-errors,
 .reservation-card .form-error,
 .reservation-card .invalid-feedback {
-    color: #f2d8a6;
+    color: #f39c12;
     font-size: 0.9rem;
     margin-top: 0.35rem;
-    min-height: 1.25rem; 
+    min-height: 1.25rem;
+}
+
 .reservation-card .form-row-wrapper {
     display: flex;
     flex-direction: column;
+}
+
+.reservation-card .form-errors ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.reservation-card .form-errors li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    color: #f39c12;
+}
+
+.reservation-card .form-errors li::before {
+    content: "⚠";
+    color: #ffd166;
+    font-size: 1rem;
+    line-height: 1;
+    margin-top: 0.1rem;
+}
+
+/* Mijenja boju ikone odabira datuma radi bolje vidljivosti na tamnoj pozadini */
+.reservation-card input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.2) contrast(1.1);
+    opacity: 0.95;
+    cursor: pointer;
+}
+
+/* Prilagođena svijetla strelica padajućeg izbornika za `select` elemente unutar kartice */
+.reservation-card select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='%23efe6c9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 16px 12px;
+    padding-right: 2.25rem;
+}
+
+.reservation-card select option {
+    color: #0b0b0b;
+    background-color: #ffffff;
+}
+
+.reservation-card select {
+    -webkit-text-fill-color: #efe6c9;
+}
+
+/* Za Firefox: osigurava da je strelica `select` elementa vidljiva prisilnim postavljanjem pozadinske slike */
+@-moz-document url-prefix() {
+    .reservation-card select {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='%23efe6c9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>");
+    }
 }
 
 .reservation-card input:focus,
