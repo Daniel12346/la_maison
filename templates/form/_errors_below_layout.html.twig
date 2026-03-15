@@ -1,0 +1,9 @@
+{% block form_row -%}
+<div{% with { attr: row_attr } %}{{ block('attributes') }}{% endwith %}>
+    <div class="form-row-wrapper">
+        {{ form_label(form) }}
+        {{ form_widget(form) }}
+        {{ form_errors(form) }}
+    </div>
+</div>
+{%- endblock %}
