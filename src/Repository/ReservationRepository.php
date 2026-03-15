@@ -75,4 +75,16 @@ class ReservationRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
+    public function getTotalGuestsForDay(\DateTimeInterface $day): int
+    {
+        $date= (new \DateTimeImmutable($day->format('Y-m-d')))->setTime(0, 0, 0);
+
+        return (int) $this->createQueryBuilder('r')
+            ->select('COALESCE(SUM(r.partySize), 0)')
+            ->andWhere('r.date = :date')
+            ->setParameter('date', $day->format('Y-m-d'))
+            ->andWhere("r.status != 'Cancelled'")->getQuery()
+            ->getSingleScalarResult();
+    }
 }
