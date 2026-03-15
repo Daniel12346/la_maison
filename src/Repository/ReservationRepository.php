@@ -78,7 +78,7 @@ class ReservationRepository extends ServiceEntityRepository
 
     public function getTotalGuestsForDay(\DateTimeInterface $day): int
     {
-        $date= (new \DateTimeImmutable($day->format('Y-m-d')))->setTime(0, 0, 0);
+        $date = (new \DateTimeImmutable($day->format('Y-m-d')))->setTime(0, 0, 0);
 
         return (int) $this->createQueryBuilder('r')
             ->select('COALESCE(SUM(r.partySize), 0)')
@@ -86,5 +86,89 @@ class ReservationRepository extends ServiceEntityRepository
             ->setParameter('date', $day->format('Y-m-d'))
             ->andWhere("r.status != 'Cancelled'")->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    public function getFullyBookedSlotKeys(?\DateTimeInterface $day = null): array
+    {
+        $qb = $this->createQueryBuilder('r')
+            ->select('r.date AS reservationDate, r.timeSlot AS reservationTime')
+            ->andWhere('LOWER(r.status) != :cancelled')
+            ->setParameter('cancelled', 'cancelled')
+            ->groupBy('r.date, r.timeSlot')
+            ->having('SUM(r.partySize) >= :maxCapacity')
+            ->setParameter('maxCapacity', 20);
+
+        if (null !== $day) {
+            $qb->andWhere('r.date = :date')
+                ->setParameter('date', $day->format('Y-m-d'));
+        }
+
+        $fullyBookedSlotKeys = [];
+
+        foreach ($qb->getQuery()->getResult() as $row) {
+            if (!isset($row['reservationDate'], $row['reservationTime'])) {
+                continue;
+            }
+
+            $datePart = $this->normalizeDatePart($row['reservationDate']);
+            $timePart = $this->normalizeTimePart($row['reservationTime']);
+
+            if (null === $datePart || null === $timePart) {
+                continue;
+            }
+
+            $fullyBookedSlotKeys[$datePart . ' ' . $timePart] = true;
+        }
+
+        return $fullyBookedSlotKeys;
+    }
+
+    private function normalizeDatePart(mixed $value): ?string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        if (is_string($value)) {
+            $date = \DateTimeImmutable::createFromFormat('Y-m-d', $value);
+            if (false !== $date) {
+                return $date->format('Y-m-d');
+            }
+
+            try {
+                return (new \DateTimeImmutable($value))->format('Y-m-d');
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeTimePart(mixed $value): ?string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('H:i');
+        }
+
+        if (is_string($value)) {
+            $time = \DateTimeImmutable::createFromFormat('H:i:s', $value)
+                ?: \DateTimeImmutable::createFromFormat('H:i', $value);
+
+            if (false !== $time) {
+                return $time->format('H:i');
+            }
+
+            try {
+                return (new \DateTimeImmutable($value))->format('H:i');
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        return null;
     }
 }
