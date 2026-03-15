@@ -4,6 +4,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
@@ -33,15 +35,21 @@ class ReservationCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        $isEditPage = Crud::PAGE_EDIT === $pageName;
         $fullyBookedSlotKeys = $this->reservationRepository->getFullyBookedSlotKeys($this->extractFilteredDate());
 
         return [
             IdField::new('id')->hideOnForm(),
-            TextField::new('referenceCode', 'Reference Code'),
-            TextField::new('fullName', 'Guest Name'),
-            DateField::new('date', 'Date')->setSortable(true),
+            TextField::new('referenceCode', 'Reference Code')
+                ->setFormTypeOption('disabled', $isEditPage),
+            TextField::new('fullName', 'Guest Name')
+                ->setFormTypeOption('disabled', $isEditPage),
+            DateField::new('date', 'Date')
+                ->setSortable(true)
+                ->setFormTypeOption('disabled', $isEditPage),
 
             TimeField::new('timeSlot', 'Time')
+                ->setFormTypeOption('disabled', $isEditPage)
                 //dodaje oznaku [FULLY BOOKED] pored vremena ako je taj time slot popunjen za odabrani datum
                 //"use" služi za pristup $fullyBookedSlotKeys unutar funkcije formatValue jer je ona closure funkcija i nema pristup vanjskim varijablama osim bez "use"
                 ->formatValue(static function ($value, ?Reservation $reservation) use ($fullyBookedSlotKeys): string {
@@ -61,8 +69,11 @@ class ReservationCrudController extends AbstractCrudController
 
                     return $formattedTime;
                 }),
-            IntegerField::new('partySize', 'Party Size'),
-            BooleanField::new('isPrivate', 'Private'),
+            IntegerField::new('partySize', 'Party Size')
+                ->setFormTypeOption('disabled', $isEditPage),
+            BooleanField::new('isPrivate', 'Private')
+                ->renderAsSwitch(false)
+                ->setFormTypeOption('disabled', true),
             ChoiceField::new('status', 'Status')
                 ->setChoices([
                     'Pending' => 'Pending',
@@ -90,6 +101,11 @@ class ReservationCrudController extends AbstractCrudController
         return $crud
             ->setDefaultSort(['date' => 'ASC'])
             ->overrideTemplate('crud/index', 'admin/reservation/index.html.twig');
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions->disable(Action::NEW);
     }
 
     //dodaje dodatne parametre koji se mogu koristiti u prilagođenom index templateu
