@@ -35,21 +35,20 @@ class ReservationCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $isEditPage = Crud::PAGE_EDIT === $pageName;
         $fullyBookedSlotKeys = $this->reservationRepository->getFullyBookedSlotKeys($this->extractFilteredDate());
 
         return [
             IdField::new('id')->hideOnForm(),
             TextField::new('referenceCode', 'Reference Code')
-                ->setFormTypeOption('disabled', $isEditPage),
+                ->setFormTypeOption('disabled', true),
             TextField::new('fullName', 'Guest Name')
-                ->setFormTypeOption('disabled', $isEditPage),
+                ->setFormTypeOption('disabled', true),
             DateField::new('date', 'Date')
                 ->setSortable(true)
-                ->setFormTypeOption('disabled', $isEditPage),
+                ->setFormTypeOption('disabled', true),
 
             TimeField::new('timeSlot', 'Time')
-                ->setFormTypeOption('disabled', $isEditPage)
+                ->setFormTypeOption('disabled', true)
                 //dodaje oznaku [FULLY BOOKED] pored vremena ako je taj time slot popunjen za odabrani datum
                 //"use" služi za pristup $fullyBookedSlotKeys unutar funkcije formatValue jer je ona closure funkcija i nema pristup vanjskim varijablama osim bez "use"
                 ->formatValue(static function ($value, ?Reservation $reservation) use ($fullyBookedSlotKeys): string {
@@ -70,7 +69,7 @@ class ReservationCrudController extends AbstractCrudController
                     return $formattedTime;
                 }),
             IntegerField::new('partySize', 'Party Size')
-                ->setFormTypeOption('disabled', $isEditPage),
+                ->setFormTypeOption('disabled', true),
             BooleanField::new('isPrivate', 'Private')
                 ->renderAsSwitch(false)
                 ->setFormTypeOption('disabled', true),
