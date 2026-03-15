@@ -96,7 +96,7 @@ class Reservation
     )]
     private ?string $phone = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, options: ['default' => 'Pending'])]
     #[Assert\Choice(choices: ['Pending', 'Completed', 'Confirmed', 'Cancelled'])]
     private ?string $status = 'Pending';
 
