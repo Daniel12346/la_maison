@@ -2,11 +2,21 @@
 
 {% block title %}Hello HomeController!{% endblock %}
 
-{% block body %}
-<style>
-</style>
+{% block stylesheets %}
+   {{ parent() }}
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Bonheur+Royale&display=swap" rel="stylesheet">
+{% endblock %}
 
-<div class="example-wrapper">
-   <twig:ReservationForm />
+{% block body %}
+<div class="homepage-hero" role="img" aria-label="Restaurant interior">
+   <div class="hero-title">La Maison</div>
+   <div class="hero-form">
+      <div class="example-wrapper">
+         <twig:ReservationForm />
+      </div>
+   </div>
 </div>
+<div class="page-bottom-gradient" aria-hidden="true"></div>
 {% endblock %}
