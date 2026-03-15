@@ -1,0 +1,14 @@
+{% extends '@EasyAdmin/crud/index.html.twig' %}
+
+{% block main %}
+    {% if filteredDate is not null %}
+        <div class="content-panel mb-3 p-3">
+            <strong>
+                Total expected guests for {{ filteredDate|date('Y-m-d') }}:
+                {{ totalExpectedGuests ?? 0 }}
+            </strong>
+        </div>
+    {% endif %}
+
+    {{ parent() }}
+{% endblock %}
