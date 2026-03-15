@@ -61,8 +61,7 @@ class ReservationCrudController extends AbstractCrudController
                     }
 
                     $slotKey = $reservation->getDate()->format('Y-m-d') . ' ' . $reservation->getTimeSlot()->format('H:i');
-
-                    if (isset($fullyBookedSlotKeys[$slotKey])) {
+                    if ($reservation->isPrivate() || isset($fullyBookedSlotKeys[$slotKey])) {
                         return $formattedTime . ' <span title="Fully Booked" style="color:#a5b4fc;">&#128274;</span>';
                     }
 
