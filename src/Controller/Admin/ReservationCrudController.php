@@ -63,7 +63,7 @@ class ReservationCrudController extends AbstractCrudController
                     $slotKey = $reservation->getDate()->format('Y-m-d') . ' ' . $reservation->getTimeSlot()->format('H:i');
 
                     if (isset($fullyBookedSlotKeys[$slotKey])) {
-                        return $formattedTime . ' [FULLY BOOKED]';
+                        return $formattedTime . ' <span title="Fully Booked" style="color:#a5b4fc;">&#128274;</span>';
                     }
 
                     return $formattedTime;
@@ -79,7 +79,17 @@ class ReservationCrudController extends AbstractCrudController
                     'Confirmed' => 'Confirmed',
                     'Cancelled' => 'Cancelled',
                     'Completed' => 'Completed',
-                ]),
+                ])
+                ->formatValue(static function ($value): string {
+                    $colors = [
+                        'Pending'   => '#fbbf24',
+                        'Confirmed' => '#34d399',
+                        'Cancelled' => '#f87171',
+                        'Completed' => '#a5b4fc',
+                    ];
+                    $color = $colors[$value] ?? 'inherit';
+                    return sprintf('<span style="color:%s;font-weight:600;">%s</span>', $color, htmlspecialchars((string) $value));
+                }),
         ];
     }
 
