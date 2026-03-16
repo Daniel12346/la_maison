@@ -16,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
@@ -37,7 +38,7 @@ class ReservationCrudController extends AbstractCrudController
     {
         $fullyBookedSlotKeys = $this->reservationRepository->getFullyBookedSlotKeys($this->extractFilteredDate());
 
-        return [
+        $fields = [
             IdField::new('id')->hideOnForm(),
             TextField::new('referenceCode', 'Reference Code')
                 ->setFormTypeOption('disabled', true),
@@ -72,7 +73,10 @@ class ReservationCrudController extends AbstractCrudController
             BooleanField::new('isPrivate', 'Private')
                 ->renderAsSwitch(false)
                 ->setFormTypeOption('disabled', true),
-            ChoiceField::new('status', 'Status')
+        ];
+
+        if ($pageName !== Crud::PAGE_EDIT) {
+            $fields[] = ChoiceField::new('status', 'Status')
                 ->setChoices([
                     'Pending' => 'Pending',
                     'Confirmed' => 'Confirmed',
@@ -88,8 +92,37 @@ class ReservationCrudController extends AbstractCrudController
                     ];
                     $color = $colors[$value] ?? 'inherit';
                     return sprintf('<span style="color:%s;font-weight:600;">%s</span>', $color, htmlspecialchars((string) $value));
-                }),
-        ];
+                });
+        }
+
+        if ($pageName === Crud::PAGE_INDEX) {
+            $fields[] = TextField::new('requests', 'Request')
+                ->setSortable(false)
+                ->formatValue(static function ($value): string {
+                    if (is_string($value) && trim($value) !== '') {
+                        return '<span title="Has request" style="color:#fbbf24;font-size:1.1rem;">&#9679;</span>';
+                    }
+
+                    return '<span title="No request" style="color:#9ca3af;">-</span>';
+                });
+        }
+
+        if ($pageName === Crud::PAGE_EDIT) {
+            $fields[] = TextareaField::new('requests', 'Reservation Requests')
+                ->setFormTypeOption('disabled', true)
+                ->setRequired(false)
+                ->setNumOfRows(4);
+            $fields[] = ChoiceField::new('status', 'Status')
+                ->setChoices([
+                    'Pending' => 'Pending',
+                    'Confirmed' => 'Confirmed',
+                    'Cancelled' => 'Cancelled',
+                    'Completed' => 'Completed',
+                ])
+                ->setHelp('<span style="color:#34d399;font-weight:500;">&#9998; This field is editable &mdash; update the reservation status here</span>');
+        }
+
+        return $fields;
     }
 
     public function configureFilters(Filters $filters): Filters
