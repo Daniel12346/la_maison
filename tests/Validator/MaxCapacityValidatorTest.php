@@ -105,4 +105,25 @@ class MaxCapacityValidatorTest extends ConstraintValidatorTestCase
             ->atPath('property.path.isPrivate')
             ->assertRaised();
     }
+
+    /**
+     * Rezervacija mora biti nevaljana kada zbroj postojećih gostiju i nove rezervacije
+     * prelazi ukupni kapacitet od 20 mjesta.
+     */
+    public function testCapacityOverflowCreatesViolation(): void
+    {
+        // Postojećih 18 + nova 5 = 23 > 20, očekuje se poruka o preostalim mjestima.
+        $this->repository
+            ->method('sumPartySizeByDateAndTimeSlot')
+            ->willReturn(18);
+
+        $reservation = $this->buildReservation(5, false);
+
+        $this->validator->validate($reservation, new MaxCapacity());
+
+        $this->buildViolation('There are only {{ available }} seats left at the selected time.')
+            ->setParameter('{{ available }}', '2')
+            ->atPath('property.path.partySize')
+            ->assertRaised();
+    }
 }
