@@ -11,6 +11,15 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 70vh;
+    padding: 1.5rem 1rem;
+}
+
+@media (min-width: 768px) {
+    .confirmation-page .example-wrapper {
+        min-height: calc(100vh - 6rem);
+        align-items: flex-start;
+        padding-top: 4rem;
+    }
 }
 
 .reservation-card {
@@ -405,4 +414,98 @@ body {
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(201, 163, 67, 0.12);
+}
+
+/* Confirmation screen styling */
+.confirmation-card {
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    padding: 2rem;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.65),
+        0 12px 48px rgba(212, 175, 55, 0.18),
+        0 0 36px rgba(212, 175, 55, 0.12);
+    background: rgba(11, 11, 11, 0.88);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.confirmation-card .confirmation-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f6e7a3;
+    letter-spacing: 0.025em;
+    margin: 0;
+    text-align: center;
+}
+
+.confirmation-card .confirmation-subtitle {
+    color: rgba(255, 238, 192, 0.9);
+    text-align: center;
+    margin: 0;
+}
+
+.confirmation-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.detail-label {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.detail-value {
+    color: #f3e7c5;
+    font-weight: 700;
+}
+
+.button.primary {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    background: linear-gradient(
+        90deg,
+        rgba(201, 163, 67, 0.95),
+        rgba(212, 175, 55, 0.95)
+    );
+    color: #0b0b0b;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.button.primary:hover,
+.button.primary:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(212, 175, 55, 0.4);
+}
+
+@media (max-width: 640px) {
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+    }
 }
