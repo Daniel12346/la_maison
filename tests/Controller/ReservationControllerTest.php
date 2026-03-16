@@ -85,6 +85,73 @@ class ReservationControllerTest extends TestCase
         $this->assertStringContainsString('/confirmation/', $location);
     }
 
+    // Ovaj test provjerava da neispravna forma ne sprema rezervaciju
+    // i korisnika vraća na početnu stranicu.
+    public function testInvalidSubmissionRedirectsToHome(): void
+    {
+        $reservationRepository = $this->createMock(ReservationRepository::class);
+        $reservationRepository->method('getAvailableTimeSlots')
+            ->willReturn(['12:00']);
+
+        $formFactory = Forms::createFormFactoryBuilder()
+            ->addExtension(new HttpFoundationExtension())
+            ->addType(new ReservationFormType($reservationRepository))
+            ->getFormFactory();
+
+        $form = $formFactory->create(ReservationFormType::class);
+        $formName = $form->getName();
+        $csrfToken = null;
+        if ($form->has('_token')) {
+            $csrfToken = $form->get('_token')->getData();
+        }
+
+        $router = $this->createMock(UrlGeneratorInterface::class);
+        $router->method('generate')
+            ->willReturnCallback(static function (string $routeName): string {
+                return 'app_home' === $routeName ? '/' : '/confirmation/REF123';
+            });
+
+        $container = new Container();
+        $container->set('form.factory', $formFactory);
+        $container->set('router', $router);
+
+        $controller = new HomeController();
+        $controller->setContainer($container);
+
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects($this->never())->method('persist');
+        $entityManager->expects($this->never())->method('flush');
+
+        $doctrine = $this->createMock(ManagerRegistry::class);
+        $doctrine->method('getManager')->willReturn($entityManager);
+
+        $tomorrow = (new \DateTimeImmutable('tomorrow'))->format('Y-m-d');
+
+        // Neispravno: nedostaju puna forma polja nakon odabira timeSlota
+        $formValues = [
+            'partySize' => 1,
+            'date' => $tomorrow,
+            'isPrivate' => 0,
+            'timeSlot' => '12:00',
+            'fullName' => '',
+            'email' => '',
+            'phone' => '',
+        ];
+
+        if ($csrfToken !== null) {
+            $formValues['_token'] = $csrfToken;
+        }
+
+        $request = Request::create('/reserve', 'POST', [
+            $formName => $formValues,
+        ]);
+
+        $response = $controller->submit($request, $doctrine);
+
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame('/', $response->headers->get('Location'));
+    }
+
     // Ovaj test provjerava da ConfirmationController pravilno prikazuje
     // detalje rezervacije (ime, datum, vrijeme itd.) u predlošku.
     public function testConfirmationPageShowsReservationData(): void
