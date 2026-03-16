@@ -63,4 +63,17 @@ class ReservationTest extends TestCase
             (string) $violations
         );
     }
+
+    public function testGenerateReferenceCodeOnCreate(): void
+    {
+        $reservation = new Reservation();
+        $this->assertNull($reservation->getReferenceCode());
+
+        // simulira se lifecycle callback koji se poziva prije spremanja entiteta u bazu
+        $reservation->generateReferenceCode();
+
+        $referenceCode = $reservation->getReferenceCode();
+        $this->assertNotNull($referenceCode);
+        $this->assertMatchesRegularExpression('/^LM\-[A-F0-9]{5}$/', $referenceCode);
+    }
 }
