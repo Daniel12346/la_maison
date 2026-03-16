@@ -25,7 +25,18 @@
 
         <div class="private-side">
             {% if form.isPrivate is defined %}
-                {{ form_row(form.isPrivate) }}
+                <div class="private-row">
+                    {{ form_label(form.isPrivate) }}
+                    {{ form_widget(form.isPrivate) }}
+                    <span
+                        class="info-icon"
+                        role="button"
+                        tabindex="0"
+                        data-popover-text="Book the entire venue exclusively for your group. Available on Fridays & Saturdays for parties of 6-12 people."
+                        aria-label="Private reservation info"
+                    >i</span>
+                </div>
+                {{ form_errors(form.isPrivate) }}
             {% endif %}
         </div>
     </div>
