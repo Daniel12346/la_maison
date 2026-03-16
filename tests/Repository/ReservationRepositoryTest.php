@@ -37,24 +37,16 @@ class ReservationRepositoryTest extends TestCase
             ->method('getResult')
             ->willReturn($queryResult);
 
-        $metadata = new \Doctrine\ORM\Mapping\ClassMetadata(Reservation::class);
-
         $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->expects($this->once())
-            ->method('getClassMetadata')
-            ->with(Reservation::class)
-            ->willReturn($metadata);
         $entityManager->expects($this->once())
             ->method('createQuery')
             ->willReturn($query);
 
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->expects($this->once())
-            ->method('getManagerForClass')
-            ->with(Reservation::class)
-            ->willReturn($entityManager);
-
-        $repository = new ReservationRepository($registry);
+        $repository = $this->getMockBuilder(ReservationRepository::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getEntityManager'])
+            ->getMock();
+        $repository->method('getEntityManager')->willReturn($entityManager);
 
         $available = $repository->getAvailableTimeSlots($date, $partySize, false);
 
@@ -68,12 +60,14 @@ class ReservationRepositoryTest extends TestCase
         $partySize = 1;
 
         $query = $this->createMock(\Doctrine\ORM\Query::class);
-        $query->expects($this->once())
+        $query->method('setParameter')
+            ->willReturnSelf();
+        $query->expects($this->exactly(2))
             ->method('getResult')
             ->willReturn([]);
 
         $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->expects($this->once())
+        $entityManager->expects($this->exactly(2))
             ->method('createQuery')
             ->with($this->callback(function (string $dql) {
                 // Osigura da se u DQL upitu filtriraju otkazane rezervacije
@@ -81,10 +75,11 @@ class ReservationRepositoryTest extends TestCase
             }))
             ->willReturn($query);
 
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->willReturn($entityManager);
-
-        $repository = new ReservationRepository($registry);
+        $repository = $this->getMockBuilder(ReservationRepository::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getEntityManager'])
+            ->getMock();
+        $repository->method('getEntityManager')->willReturn($entityManager);
 
         $available = $repository->getAvailableTimeSlots($date, $partySize, false);
 
