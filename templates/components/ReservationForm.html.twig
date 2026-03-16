@@ -10,7 +10,7 @@
                     {{ form_row(form.partySize) }}
                 </div>
                 <div>
-                    {{ form_row(form.date) }}
+                    {{ form_row(form.date, {'attr': {'data-reservation-date': 'true'}}) }}
                 </div>
             </div>
 
@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div class="private-side">
+        <div class="private-side" data-private-section="true" style="display: none;">
             {% if form.isPrivate is defined %}
                 <div class="private-row">
                     {{ form_label(form.isPrivate) }}
@@ -44,3 +44,28 @@
     {{ form_rest(form) }}
     {{ form_end(form) }}
 </div>
+
+<script>
+(function() {
+    const dateInput = document.querySelector('[data-reservation-date]');
+    const privateSection = document.querySelector('[data-private-section]');
+    
+    if (!dateInput || !privateSection) return;
+    
+    function updatePrivateVisibility() {
+        if (!dateInput.value) {
+            privateSection.style.display = 'none';
+            return;
+        }
+        
+        const date = new Date(dateInput.value + 'T00:00:00');
+        const day = date.getDay();
+        
+        // Friday = 5, Saturday = 6
+        privateSection.style.display = (day === 5 || day === 6) ? '' : 'none';
+    }
+    
+    dateInput.addEventListener('change', updatePrivateVisibility);
+    updatePrivateVisibility();
+})();
+</script>
