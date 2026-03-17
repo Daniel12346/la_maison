@@ -13,7 +13,11 @@
    <div class="hero-title">La Maison</div>
    <div class="hero-form">
       <div class="example-wrapper">
-         <twig:ReservationForm />
+         {% if reservationForm is defined %}
+            {{ component('ReservationForm', { form: reservationForm }) }}
+         {% else %}
+            {{ component('ReservationForm') }}
+         {% endif %}
       </div>
    </div>
 </div>
