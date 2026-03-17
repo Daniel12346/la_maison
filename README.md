@@ -138,7 +138,7 @@ php -S localhost:8000 -t public
 
 ## Javna stranica
 
-![Početna stranica rezervacije](public/assets/image.png)
+![Početna stranica rezervacije](docs/images/image.png)
 
 Početna stranica preko koje korisnik obavlja rezervaciju je na uobičajenoj početnoj ruti "/" (ako je projekt lokalno pokrenut na https://localhost:8000, ta ista lokacija predstavlja početnu stranicu).  
 Dizajn početne stranice je jednostavan s crno-zlatnom temom, kombinacijom boja koja predstavlja luksuz. Na sredini početne stranice je postavljen form za rezervaciju, s namjerom kako bi se korisniku privukla pozornost na njega. Na početku su u formu vidljiva samo dva polja, za broj gostiju u rezervaciji i željeni datum. Ako je odabrani datum petak ili nedjelja, vidljiva je i opcija za privatne rezervacije s kratkim pojašnjenjem te opcije. Sa samo 2, odnosno 3 polja, form u trenutku kad ga korisnik prvi put vidi izgleda jednostavnije i pristupačnije nego da odmah vidi sva ostala polja koja u tom trenutku nisu zapravo potrebna, a njihova prisutnost instinktivno može asocirati korisnik na potreban dodatan trud i vrijeme i tako ga odbiti. Ako u bilo kojem trenutku korisnik unese vrijednost koja nije dozvoljena za broj gostiju ili datum (datum mora biti najviše 30 dana nakon sadašnjeg), ispod odgovarajućeg polja prikazuje se upozorenje i pojašnjenje greške.  
@@ -146,7 +146,7 @@ Kad korisnik ispuni ova osnovna polja, prikazuju mu se dostupni vremenski termin
 
 ## Administratorski dio
 
-![Uređivanje rezervacije (admin)](public/assets/reservation_edit.png)
+![Uređivanje rezervacije (admin)](docs/images/reservation_edit.png)
 
 Pretpostavka je da administrator ne mora biti tehnološki stručnjak pa sučelje mora biti jednostavno i jasno. Pregled svih rezervacija je na ruti "/admin/reservation".  
 Rezervacije se mogu sortirati prema bilo kojem polju i filtrirati po datumu i stanju. Ako su filtrirane po datumu, za taj datum je označen i ukupan broj gostiju.
