@@ -6,7 +6,9 @@ frontend se temelji na Twig predlošcima. Za testove je korišten PHPunit.
 ## ⚙️ Instalacija projekta `la_maison` na Windowsu
 
 ### 🔧 Preduvjeti (potrebno instalirati ručno)
+
 Prije svega, instaliraj sljedeće alate:
+
 - **[Git](https://git-scm.com/download/win)** — za kloniranje repozitorija
 - **[PHP 8.2+](https://windows.php.net/download/)** — zahtijeva se verzija `>=8.2`
 - **[Composer](https://getcomposer.org/download/)** — upravitelj PHP paketa
@@ -20,6 +22,7 @@ Prije svega, instaliraj sljedeće alate:
 git clone https://github.com/Daniel12346/la_maison.git
 cd la_maison
 ```
+
 > Preuzima projekt s GitHuba i ulazi u mapu projekta.
 
 ---
@@ -29,6 +32,7 @@ cd la_maison
 ```bash
 composer install
 ```
+
 > Instalira sve pakete navedene u `composer.json` (Symfony, Doctrine, Twig, itd.). Također automatski čisti cache, instalira assete i pokreće `importmap:install`.
 
 ---
@@ -36,15 +40,18 @@ composer install
 ### 🔑 3. Postavljanje varijabli okoline
 
 Kopiraj `.env` datoteku u lokalnu verziju:
+
 ```bash
 copy .env .env.local
 ```
+
 > Kreira lokalnu konfiguracijsku datoteku koja nije praćena Gitom. Otvori `.env.local` u uređivaču teksta i postavi:
 
 ```dotenv
 APP_SECRET=nekiRandomniString32ZnakaDugacak
 DATABASE_URL="postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
 ```
+
 > `APP_SECRET` može biti bilo koji nasumičan niz od 32 znaka. `DATABASE_URL` mora odgovarati postavkama baze (korisnik, lozinka, naziv baze).
 
 ---
@@ -54,6 +61,7 @@ DATABASE_URL="postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&ch
 ```bash
 docker compose up -d
 ```
+
 > Pokreće PostgreSQL kontejner u pozadini, kako je definirano u `compose.yaml`. Baza podataka bit će dostupna na `127.0.0.1:5432`.
 
 ---
@@ -63,6 +71,7 @@ docker compose up -d
 ```bash
 php bin/console doctrine:database:create
 ```
+
 > Kreira praznu bazu podataka u PostgreSQL-u.
 
 ---
@@ -72,6 +81,7 @@ php bin/console doctrine:database:create
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
+
 > Izvršava sve migracije i kreira tablice u bazi podataka. Potvrdi unosom `yes` kada se to zatraži.
 
 ---
@@ -81,6 +91,7 @@ php bin/console doctrine:migrations:migrate
 ```bash
 php bin/console doctrine:fixtures:load
 ```
+
 > Puni bazu s primjerima rezervacija (20 unosa) koji su definirani u `src/DataFixtures/ReservationFixture.php`. Potvrdi unosom `yes`.
 
 ---
@@ -90,9 +101,11 @@ php bin/console doctrine:fixtures:load
 ```bash
 php -S localhost:8000 -t public
 ```
+
 > Pokreće ugrađeni PHP server. Aplikacija je dostupna na [http://localhost:8000](http://localhost:8000).
 
 > **Alternativno**, ako je instaliran [Symfony CLI](https://symfony.com/download):
+>
 > ```bash
 > symfony server:start
 > ```
@@ -104,6 +117,7 @@ php -S localhost:8000 -t public
 ```bash
 php bin/phpunit
 ```
+
 > Pokreće sve PHPUnit testove. Testovi koriste zasebnu konfiguraciju iz `.env.test` i ne trebaju aktivnu bazu podataka (koriste mockove).
 
 ---
@@ -122,8 +136,9 @@ php bin/console doctrine:fixtures:load
 php -S localhost:8000 -t public
 ```
 
-
 ## Javna stranica
+
+![Početna stranica rezervacije](public/assets/image.png)
 
 Početna stranica preko koje korisnik obavlja rezervaciju je na uobičajenoj početnoj ruti "/" (ako je projekt lokalno pokrenut na https://localhost:8000, ta ista lokacija predstavlja početnu stranicu).  
 Dizajn početne stranice je jednostavan s crno-zlatnom temom, kombinacijom boja koja predstavlja luksuz. Na sredini početne stranice je postavljen form za rezervaciju, s namjerom kako bi se korisniku privukla pozornost na njega. Na početku su u formu vidljiva samo dva polja, za broj gostiju u rezervaciji i željeni datum. Ako je odabrani datum petak ili nedjelja, vidljiva je i opcija za privatne rezervacije s kratkim pojašnjenjem te opcije. Sa samo 2, odnosno 3 polja, form u trenutku kad ga korisnik prvi put vidi izgleda jednostavnije i pristupačnije nego da odmah vidi sva ostala polja koja u tom trenutku nisu zapravo potrebna, a njihova prisutnost instinktivno može asocirati korisnik na potreban dodatan trud i vrijeme i tako ga odbiti. Ako u bilo kojem trenutku korisnik unese vrijednost koja nije dozvoljena za broj gostiju ili datum (datum mora biti najviše 30 dana nakon sadašnjeg), ispod odgovarajućeg polja prikazuje se upozorenje i pojašnjenje greške.  
@@ -131,11 +146,12 @@ Kad korisnik ispuni ova osnovna polja, prikazuju mu se dostupni vremenski termin
 
 ## Administratorski dio
 
-Pretpostavka je da administrator ne mora biti tehnološki stručnjak pa sučelje mora biti jednostavno i jasno. Pregled svih rezervacija je na ruti "/admin/reservation".   
+![Uređivanje rezervacije (admin)](public/assets/reservation_edit.png)
+
+Pretpostavka je da administrator ne mora biti tehnološki stručnjak pa sučelje mora biti jednostavno i jasno. Pregled svih rezervacija je na ruti "/admin/reservation".  
 Rezervacije se mogu sortirati prema bilo kojem polju i filtrirati po datumu i stanju. Ako su filtrirane po datumu, za taj datum je označen i ukupan broj gostiju.
 Iako to nije navedeno u opisu zadatka, u ovom pregledu administratoru je prikazano i je li rezervacija privatna ili ne, iz razloga što privatna rezervacija i "obična" mogu postojati u istom termin pa je moguće da za isti termin ima još kapaciteta za nove obične ali ne i privatne ili obratno. Bez informacije da je jedna od njih privatna, administrator ne bi mogao razumjeti ovu situaciju.  
 Kako bi se administratoru privukla pažnja na neke njima posebno bitne aspekte rezervacija, oni su istaknuti jednostavnim ikonama i bojama: vremenski termin koji je popunjen označen je lokotom na rezervacijama s takvim terminom, narančastom točkom su označene rezervacije s posebnim korisničkim zahtjevima, a različita stanja rezervacije su posebno istaknuta prikladnim bojama jer njih administrator može mijenjati u pregledu pojedinačne rezervacije na ruti "/admin/reservation/{id}/edit", gdje je id jedinstveni identifikator rezervacije. Ovoj ruti se pristupa klikom na rezervaciju u pregledu svih rezervacija. Na toj ruti je također dodatno istaknuto da se tu upravlja statusom rezervacije (ostali podatci postojeće rezervacije ne mogu se mijenjati). Rezervacije sa statusom "Cancelled" se ne računaju kod provjeravanja popunjenosti termina. Uz potvrđene ("Confirmed"), računaju se i one koje još nisu potvrđene ("Pending") jer se pretpostavlja da će biti potvrđene pa je bolje odmah osigurati kapacitet za njih.
-
 
 ## Testiranje
 
@@ -146,9 +162,9 @@ Projekt sadrži 5 testnih klasa (plus bootstrap datoteku) koje pokrivaju kontrol
 
 - ReservationControllerTest.php  
   Provjerava ponašanje slanja rezervacije i prikaza potvrde:
-  - valjano slanje forme preusmjerava na stranicu potvrde
-  - nevaljano slanje ponovno prikazuje početnu stranicu s greškama bez spremanja (HTTP 422)
-  - stranica potvrde ispravno prikazuje podatke rezervacije
+    - valjano slanje forme preusmjerava na stranicu potvrde
+    - nevaljano slanje ponovno prikazuje početnu stranicu s greškama bez spremanja (HTTP 422)
+    - stranica potvrde ispravno prikazuje podatke rezervacije
 
 - ReservationFlowTest.php  
   Simulira neispravan end-to-end tok slanja forme (uključujući CSRF) i potvrđuje da aplikacija sigurno vraća korisnika na početnu stranicu bez upisa u bazu (renderanje početne stranice s kodom 422).
@@ -160,24 +176,24 @@ Projekt sadrži 5 testnih klasa (plus bootstrap datoteku) koje pokrivaju kontrol
 
 - ReservationTest.php  
   Validira osnovna pravila entiteta Reservation:
-  - odbija datum izvan dozvoljenog raspona od 30 dana
-  - generira referentni kod u očekivanom formatu kroz lifecycle callback
+    - odbija datum izvan dozvoljenog raspona od 30 dana
+    - generira referentni kod u očekivanom formatu kroz lifecycle callback
 
 ### Testovi repozitorija
 
 - ReservationRepositoryTest.php  
   Testira logiku dostupnih termina:
-  - popunjeni termini se uklanjaju iz liste dostupnih
-  - otkazane rezervacije ne blokiraju termin (za regularne i privatne kontekste)
+    - popunjeni termini se uklanjaju iz liste dostupnih
+    - otkazane rezervacije ne blokiraju termin (za regularne i privatne kontekste)
 
 ### Testovi validatora
 
 - MaxCapacityValidatorTest.php  
   Testira prilagođena pravila maksimalnog kapaciteta:
-  - regularne rezervacije ignoriraju broj gostiju privatnih rezervacija za zajednički limit od 20 mjesta
-  - privatna rezervacija je valjana ako ne postoji druga privatna u istom terminu
-  - dvije privatne rezervacije u istom terminu nisu dozvoljene
-  - pojavljuje se greška kada regularni kapacitet prelazi 20
+    - regularne rezervacije ignoriraju broj gostiju privatnih rezervacija za zajednički limit od 20 mjesta
+    - privatna rezervacija je valjana ako ne postoji druga privatna u istom terminu
+    - dvije privatne rezervacije u istom terminu nisu dozvoljene
+    - pojavljuje se greška kada regularni kapacitet prelazi 20
 
 ### Bootstrap za testove
 
