@@ -1,7 +1,16 @@
+{% set showPrivateSection = form.date.vars.value ? (form.date.vars.value|date('N') in [5, 6]) : false %}
+
 <div class="reservation-card" {{ attributes }}>
 <!-- nakon podnošenja forme, korisnik će biti preusmjeren na stranicu za potvrdu -->
     {% form_theme form 'form/_errors_below_layout.html.twig' %}
-    {{ form_start(form, {'action': path('reservation_submit'), 'method': 'POST'}) }}
+    {{ form_start(form, {
+        'action': path('reservation_submit'),
+        'method': 'POST',
+        'attr': {
+            'data-action': 'submit->live#action:prevent',
+            'data-live-action-param': 'save'
+        }
+    }) }}
 
     <div class="reservation-layout">
         <div class="form-main">
@@ -23,7 +32,7 @@
             </div>
         </div>
 
-        <div class="private-side" data-private-section="true" style="display: none;">
+        <div class="private-side"{% if not showPrivateSection %} style="display: none;"{% endif %}>
             {% if form.isPrivate is defined %}
                 <div class="private-row">
                     {{ form_label(form.isPrivate) }}
@@ -44,28 +53,3 @@
     {{ form_rest(form) }}
     {{ form_end(form) }}
 </div>
-
-<script>
-(function() {
-    const dateInput = document.querySelector('[data-reservation-date]');
-    const privateSection = document.querySelector('[data-private-section]');
-    
-    if (!dateInput || !privateSection) return;
-    
-    function updatePrivateVisibility() {
-        if (!dateInput.value) {
-            privateSection.style.display = 'none';
-            return;
-        }
-        
-        const date = new Date(dateInput.value + 'T00:00:00');
-        const day = date.getDay();
-        
-        // Friday = 5, Saturday = 6
-        privateSection.style.display = (day === 5 || day === 6) ? '' : 'none';
-    }
-    
-    dateInput.addEventListener('change', updatePrivateVisibility);
-    updatePrivateVisibility();
-})();
-</script>
