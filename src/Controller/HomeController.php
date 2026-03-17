@@ -37,6 +37,12 @@ final class HomeController extends AbstractController
             return $this->redirectToRoute('confirmation', ['referenceCode' => $reservation->getReferenceCode()]);
         }
 
-        return $this->redirectToRoute('app_home');
+        $response = $this->render('home/index.html.twig', [
+            'controller_name' => 'HomeController',
+            'reservationForm' => $form->createView(),
+        ]);
+        $response->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        return $response;
     }
 }
