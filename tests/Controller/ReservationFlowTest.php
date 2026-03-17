@@ -12,14 +12,15 @@ use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class ReservationFlowTest extends TestCase
 {
-    // Simulira neispravno slanje forme i provjerava preusmjeravanje na početnu stranicu.
-    public function testInvalidReservationSubmissionRedirectsToHome(): void
+    // Simulira neispravno slanje forme i provjerava da se stranica ponovno prikazuje s greškama.
+    public function testInvalidReservationSubmissionRendersHomeWithErrors(): void
     {
         $reservationRepository = $this->createMock(ReservationRepository::class);
         $reservationRepository->method('getAvailableTimeSlots')
@@ -61,14 +62,23 @@ class ReservationFlowTest extends TestCase
         }
 
         $router = $this->createMock(UrlGeneratorInterface::class);
-        $router->expects($this->once())
-            ->method('generate')
-            ->with('app_home', [], 1)
-            ->willReturn('/');
+
+        $twig = $this->createMock(\Twig\Environment::class);
+        $twig->expects($this->once())
+            ->method('render')
+            ->with(
+                'home/index.html.twig',
+                $this->callback(static function (array $context): bool {
+                    return isset($context['controller_name'], $context['reservationForm'])
+                        && 'HomeController' === $context['controller_name'];
+                })
+            )
+            ->willReturn('rendered-invalid');
 
         $container = new Container();
         $container->set('form.factory', $formFactory);
         $container->set('router', $router);
+        $container->set('twig', $twig);
 
         $controller = new HomeController();
         $controller->setContainer($container);
@@ -99,9 +109,7 @@ class ReservationFlowTest extends TestCase
 
         $response = $controller->submit($request, $doctrine);
 
-        $this->assertSame(302, $response->getStatusCode());
-        $location = $response->headers->get('Location');
-        $this->assertNotNull($location);
-        $this->assertSame('/', $location);
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+        $this->assertSame('rendered-invalid', $response->getContent());
     }
 }

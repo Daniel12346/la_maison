@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ReservationControllerTest extends TestCase
@@ -86,8 +87,8 @@ class ReservationControllerTest extends TestCase
     }
 
     // Ovaj test provjerava da neispravna forma ne sprema rezervaciju
-    // i korisnika vraća na početnu stranicu.
-    public function testInvalidSubmissionRedirectsToHome(): void
+    // i ponovno prikazuje početnu stranicu s greškama forme.
+    public function testInvalidSubmissionRendersHomeWithErrors(): void
     {
         $reservationRepository = $this->createMock(ReservationRepository::class);
         $reservationRepository->method('getAvailableTimeSlots')
@@ -106,14 +107,23 @@ class ReservationControllerTest extends TestCase
         }
 
         $router = $this->createMock(UrlGeneratorInterface::class);
-        $router->method('generate')
-            ->willReturnCallback(static function (string $routeName): string {
-                return 'app_home' === $routeName ? '/' : '/confirmation/REF123';
-            });
+
+        $twig = $this->createMock(\Twig\Environment::class);
+        $twig->expects($this->once())
+            ->method('render')
+            ->with(
+                'home/index.html.twig',
+                $this->callback(static function (array $context): bool {
+                    return isset($context['controller_name'], $context['reservationForm'])
+                        && 'HomeController' === $context['controller_name'];
+                })
+            )
+            ->willReturn('rendered-invalid');
 
         $container = new Container();
         $container->set('form.factory', $formFactory);
         $container->set('router', $router);
+        $container->set('twig', $twig);
 
         $controller = new HomeController();
         $controller->setContainer($container);
@@ -148,8 +158,8 @@ class ReservationControllerTest extends TestCase
 
         $response = $controller->submit($request, $doctrine);
 
-        $this->assertSame(302, $response->getStatusCode());
-        $this->assertSame('/', $response->headers->get('Location'));
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+        $this->assertSame('rendered-invalid', $response->getContent());
     }
 
     // Ovaj test provjerava da ConfirmationController pravilno prikazuje
