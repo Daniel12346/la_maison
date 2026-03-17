@@ -147,11 +147,14 @@ Projekt sadrži 5 testnih klasa (plus bootstrap datoteku) koje pokrivaju kontrol
 - ReservationControllerTest.php  
   Provjerava ponašanje slanja rezervacije i prikaza potvrde:
   - valjano slanje forme preusmjerava na stranicu potvrde
-  - nevaljano slanje preusmjerava na početnu bez spremanja
+  - nevaljano slanje ponovno prikazuje početnu stranicu s greškama bez spremanja (HTTP 422)
   - stranica potvrde ispravno prikazuje podatke rezervacije
 
 - ReservationFlowTest.php  
-  Simulira neispravan end-to-end tok slanja forme (uključujući CSRF) i potvrđuje da aplikacija sigurno vraća korisnika na početnu stranicu bez upisa u bazu.
+  Simulira neispravan end-to-end tok slanja forme (uključujući CSRF) i potvrđuje da aplikacija sigurno vraća korisnika na početnu stranicu bez upisa u bazu (renderanje početne stranice s kodom 422).
+
+- ReservationFormLiveComponentTest.php  
+  Pokriva dinamičko ponašanje forme: nakon odabira broja gostiju i datuma, dostupni termini se učitavaju i prikazuju u formi.
 
 ### Testovi entiteta
 
