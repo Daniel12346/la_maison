@@ -3,8 +3,8 @@
 /**
  * Testira MaxCapacity validator.
  *
- * Osigurava da obična rezervacija i privatna rezervacija mogu imati isti vremenski
- * slot kada ukupan broj gostiju ostane unutar kapaciteta lokacije.
+ * Osigurava da privatne rezervacije ne ulaze u zajednički kapacitet od 20 mjesta
+ * za regularne rezervacije u istom vremenskom slotu.
  */
 
 namespace App\Tests\Validator;
@@ -45,18 +45,18 @@ class MaxCapacityValidatorTest extends ConstraintValidatorTestCase
     }
 
     /**
-     * Obična rezervacija mora biti valjana kada privatna rezervacija već zauzima
-     * isti vremenski slot, pod uvjetom da ukupan broj gostiju ne prelazi 20.
+     * Obična rezervacija računa samo regularne rezervacije unutar slota.
+     * Privatne rezervacije ne smiju smanjiti dostupni kapacitet od 20 mjesta.
      */
-    public function testNormalReservationIsValidWhenPrivateAlreadyExists(): void
+    public function testNormalReservationIgnoresPrivateGuestsForCapacity(): void
     {
-        // Postojeća privatna rezervacija ima 8 gostiju; nova obična dodaje 5.
-        // Ukupno = 13 ≤ 20 → ne očekuje se kršenje pravila.
+        // Simuliramo situaciju u kojoj u slotu postoje samo privatni gosti,
+        // pa zbroj regularnih gostiju ostaje 0.
         $this->repository
             ->method('sumPartySizeByDateAndTimeSlot')
-            ->willReturn(8);
+            ->willReturn(0);
 
-        $normalReservation = $this->buildReservation(5, false);
+        $normalReservation = $this->buildReservation(15, false);
 
         $this->validator->validate($normalReservation, new MaxCapacity());
 
@@ -74,11 +74,9 @@ class MaxCapacityValidatorTest extends ConstraintValidatorTestCase
             ->method('findOneBy')
             ->willReturn(null);
 
-        // Postojeća obična rezervacija ima 10 gostiju; nova privatna dodaje 8.
-        // Ukupno = 18 ≤ 20 → ne očekuje se kršenje pravila.
         $this->repository
-            ->method('sumPartySizeByDateAndTimeSlot')
-            ->willReturn(10);
+            ->expects($this->never())
+            ->method('sumPartySizeByDateAndTimeSlot');
 
         $privateReservation = $this->buildReservation(8, true);
 

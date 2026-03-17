@@ -44,6 +44,8 @@ class MaxCapacityValidator extends ConstraintValidator
                     ->addViolation();
                 return;
             }
+
+            return;
         }
 
 
@@ -53,7 +55,7 @@ class MaxCapacityValidator extends ConstraintValidator
         //$existing je zbroj partySize-a svih rezervacija koje su već na taj datum i timeSlot (osim trenutne rezervacije ako se radi o updateu)
         //pri njegovu izračunu isključujemo trenutnu rezervaciju, što nije potrebno kod nove rezervacije, ali je važno kod updatea gdje trenutna rezervacija već ima partySize u bazi podataka
         $excludeId = $value->getId();
-        $existing = $this->repository->sumPartySizeByDateAndTimeSlot($date, $timeSlot, $excludeId);
+        $existing = $this->repository->sumPartySizeByDateAndTimeSlot($date, $timeSlot, false, $excludeId);
         $total = $existing + $partySize;
 
         $max = 20;

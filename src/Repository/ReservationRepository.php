@@ -57,16 +57,18 @@ class ReservationRepository extends ServiceEntityRepository
         return $availableTimeSlots;
     }
 
-    public function sumPartySizeByDateAndTimeSlot(\DateTime $date, \DateTime $timeSlot, ?int $excludeId = null): int
+    public function sumPartySizeByDateAndTimeSlot(\DateTime $date, \DateTime $timeSlot, bool $isPrivate = false, ?int $excludeId = null): int
     {
         $qb = $this->createQueryBuilder('r')
             //COALESCE vraća 0 ako nema rezultata
             ->select('COALESCE(SUM(r.partySize), 0) as total')
             ->andWhere('r.date = :date')
             ->andWhere('r.timeSlot = :timeSlot')
+            ->andWhere('r.isPrivate = :isPrivate')
             ->andWhere("r.status != 'Cancelled'")
             ->setParameter('date', $date)
-            ->setParameter('timeSlot', $timeSlot);
+            ->setParameter('timeSlot', $timeSlot)
+            ->setParameter('isPrivate', $isPrivate);
 
         if (null !== $excludeId) {
             $qb->andWhere('r.id != :id')
